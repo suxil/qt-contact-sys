@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QDebug>
 #include <QTableWidget>
+#include <QStringLiteral>
 
 #include "contactdialog.h"
 

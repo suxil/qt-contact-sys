@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->actionadd, &QAction::triggered, this, [=]() {
        qDebug() << "add";
+       contactDialog->setWindowTitle(QString("添加联系人"));
        int status = contactDialog->exec();
        if (status == QDialog::Accepted) {
 
@@ -22,6 +23,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->actionedit, &QAction::triggered, this, [=]() {
        qDebug() << "edit";
+       contactDialog->setWindowTitle(QString("修改联系人"));
+       int status = contactDialog->exec();
+       if (status == QDialog::Accepted) {
+
+           QString name;
+
+       }
+       contactDialog->clearMask();
     });
 
     connect(ui->actiondelete, &QAction::triggered, this, [=]() {
