@@ -7,6 +7,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    setWindowFlags(Qt::Window);
+
     contactDialog = new ContactDialog(this);
     contactList = new QList<Contact*>();
 
@@ -30,16 +32,21 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->actionedit, &QAction::triggered, this, [=]() {
        qDebug() << "edit";
+
+       Contact *contact = contactList->at(tableWidget->currentRow());
+
+       contactDialog->setName(contact->getName());
+       contactDialog->setUnit(contact->getUnit());
+       contactDialog->setPhone(contact->getPhone());
+       contactDialog->setEmail(contact->getEmail());
+       contactDialog->initEditReadOnly(true);
+
        contactDialog->setWindowTitle(QString("修改联系人"));
        int status = contactDialog->exec();
        if (status == QDialog::Accepted) {
-           Contact *contact = getDialogContact();
+           Contact *item = getDialogContact();
 
-           for (int i = 0; i < contactList->size(); i ++) {
-               if (contactList->at(i)->getSeq() == contact->getSeq()) {
-                   contactList->replace(i, contact);
-               }
-           }
+           contactList->replace(contact->getSeq(), item);
        }
        contactDialog->clear();
 
@@ -49,11 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actiondelete, &QAction::triggered, this, [=]() {
        qDebug() << "deleted";
 
-       for (int i = 0; i < contactList->size(); i ++) {
-//           if (contactList->at(i).data(0) == contact.seq) {
-//               contactList->removeAt(i);
-//           }
-       }
+       qDebug() << "size: " + QString(tableWidget->currentRow());
+       contactList->removeAt(tableWidget->currentRow());
 
        refreshTable();
     });
@@ -72,16 +76,24 @@ MainWindow::MainWindow(QWidget *parent)
         refreshTable();
     });
 
-//    tableWidget->horizontalHeader()->setMinimumHeight(30);
+    tableWidget->horizontalHeader()->setStretchLastSection(true); // 设置充满表宽度
 
-    QStringList tableHeader;
-    tableHeader << "人名" << "工作单位" << "电话号码" << "E-mail地址";
-    tableWidget->setHorizontalHeaderLabels(tableHeader);
-
-    tableWidget->viewport()->update();
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    tableWidget->setColumnCount(4);
+    tableWidget->setRowCount(3);
+    for (int i = 0; i < 3; i ++) {
+
+        Contact *contact = new Contact("1", "1", "1", "1");
+        contact->setSeq(i);
+        contactList->insert(i, contact);
+
+        qDebug() << "init data success";
+    }
+
+    refreshTable();
 }
 
 MainWindow::~MainWindow()
@@ -92,10 +104,6 @@ MainWindow::~MainWindow()
 void MainWindow::refreshTable()
 {
     QTableWidget *tableWidget = ui->centralwidget->findChild<QTableWidget*>("tableWidget");
-
-    QStringList tableHeader;
-    tableHeader << "人名" << "工作单位" << "电话号码" << "E-mail地址";
-    tableWidget->setHorizontalHeaderLabels(tableHeader);
 
     QLineEdit *nameSearch = ui->centralwidget->findChild<QLineEdit*>("nameSearch");
     QLineEdit *phoneSearch = ui->centralwidget->findChild<QLineEdit*>("phoneSearch");
@@ -124,7 +132,6 @@ void MainWindow::refreshTable()
         qDebug() << "show data:" << contact->getName() << ":" << contact->getUnit() << ":" << contact->getPhone() << ":" << contact->getEmail();
     }
 
-    tableWidget->setColumnCount(4);
     tableWidget->setRowCount(filterContactList->size());
 
     for (int i = 0; i < filterContactList->size(); i ++) {
@@ -138,7 +145,6 @@ void MainWindow::refreshTable()
         qDebug() << "data:" << contact->getName() << ":" << contact->getUnit() << ":" << contact->getPhone() << ":" << contact->getEmail();
     }
 
-    tableWidget->viewport()->update();
 }
 
 Contact* MainWindow::getDialogContact()

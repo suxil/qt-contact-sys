@@ -25,6 +25,7 @@ public:
     void setPhone(QString phone);
     void setEmail(QString email);
     void clear();
+    void initEditReadOnly(bool readOnly);
 
 private:
     Ui::ContactDialog *ui;

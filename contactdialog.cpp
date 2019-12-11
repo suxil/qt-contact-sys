@@ -55,4 +55,11 @@ void ContactDialog::clear()
     ui->unitEdit->clear();
     ui->phoneEdit->clear();
     ui->emailEdit->clear();
+    initEditReadOnly(false);
+}
+
+void ContactDialog::initEditReadOnly(bool readOnly)
+{
+    ui->unitEdit->setReadOnly(readOnly);
+    ui->emailEdit->setReadOnly(readOnly);
 }
