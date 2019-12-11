@@ -7,12 +7,16 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    setWindowTitle("通讯录管理系统");
+
     setWindowFlags(Qt::Window);
 
     contactDialog = new ContactDialog(this);
     contactList = new QList<Contact*>();
 
     QTableWidget *tableWidget = ui->centralwidget->findChild<QTableWidget*>("tableWidget");
+
+    tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     connect(ui->actionadd, &QAction::triggered, this, [=]() {
        qDebug() << "add";
@@ -83,15 +87,8 @@ MainWindow::MainWindow(QWidget *parent)
     tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 
     tableWidget->setColumnCount(4);
-    tableWidget->setRowCount(3);
-    for (int i = 0; i < 3; i ++) {
 
-        Contact *contact = new Contact("1", "1", "1", "1");
-        contact->setSeq(i);
-        contactList->insert(i, contact);
-
-        qDebug() << "init data success";
-    }
+    readContact();
 
     refreshTable();
 }
@@ -145,6 +142,7 @@ void MainWindow::refreshTable()
         qDebug() << "data:" << contact->getName() << ":" << contact->getUnit() << ":" << contact->getPhone() << ":" << contact->getEmail();
     }
 
+    writeContact();
 }
 
 Contact* MainWindow::getDialogContact()
@@ -156,4 +154,52 @@ Contact* MainWindow::getDialogContact()
 
     Contact *contact = new Contact(name, unit, phone, email);
     return contact;
+}
+
+void MainWindow::readContact()
+{
+    QFile file("contact.txt");
+    if (!file.open(QIODevice::ReadOnly))
+        return;
+
+    contactList->clear();
+
+    int i = 0;
+    while (!file.atEnd()) {
+        QByteArray line = file.readLine();
+        QList<QByteArray> contactByteList = line.replace("\n", "").split(',');
+
+        qDebug() << "read: " << QString(line) << ":" << contactByteList.size();
+        Contact *contact = new Contact(QString(contactByteList.at(0)), QString(contactByteList.at(1)), QString(contactByteList.at(2)), QString(contactByteList.at(3)));
+        contact->setSeq(i);
+
+        i ++;
+        contactList->insert(i, contact);
+    }
+    qDebug() << "read complete contact size: " << contactList->size();
+}
+
+void MainWindow::writeContact()
+{
+    QFile file("contact.txt");
+    if (!file.open(QIODevice::WriteOnly))
+        return;
+
+    QTextStream out(&file);
+
+    qDebug() << "contact size: " << contactList->size();
+    for (int i = 0; i < contactList->size(); i ++) {
+        Contact *contact = contactList->at(i);
+
+        QString *contactString = new QString;
+        contactString->append(contact->getName()).append(",");
+        contactString->append(contact->getUnit()).append(",");
+        contactString->append(contact->getPhone()).append(",");
+        contactString->append(contact->getEmail()).append("\n");
+
+        qDebug() << contactString->toUtf8();
+
+        out << contactString->toUtf8();
+    }
+
 }

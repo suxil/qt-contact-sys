@@ -11,6 +11,7 @@
 #include <QList>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QFile>
 
 #include "contactdialog.h"
 #include "contact.h"
@@ -36,6 +37,8 @@ private:
     QList<Contact*> *contactList;
 
     Contact* getDialogContact();
+    void readContact();
+    void writeContact();
 
 };
 #endif // MAINWINDOW_H
